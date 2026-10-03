@@ -22,15 +22,16 @@ Live prototype: open `prototype/web/index.html` in a browser (or `http://localho
 - OTP screen: 6 centered boxes in one group (not scattered) + hidden paste helper, 30s resend timer, `Edit email/phone`, `Verify & continue` — mock OTP `123456` (any 6 digits accepted for testing)
 - Files: `prototype/web/index.html:28`, `styles.css:118`, `app.js:32`
 
-### 3. Trips (replaces Notes) — looks like the reference Notes app, no To-do tab
+### 3. Trips (replaces Notes) — trips only, no Tpo/9i/irrelevant names
 - **Header:** `All ▸ N trips` (tap to open folders) + search + sort icons — dark notes style `styles.css:142` (`#000` bg, `#1a1a1a` borders)
-- **List:** Title (19px white), preview (gray ellipsis), date pill + category pill — 8 seed trips: `Bangalore 2026`, `Manali 2024`, `First date with my love`, `Family trip 2025`, `Frnds trip 2027`, `Goa diaries`, `Tpo`, `9i` — each is a trip
-- **Search:** tap `⌕` → inline bar filters by title/preview/category live
+- **List:** Title (19px white), preview (gray ellipsis), date pill + category pill — 8 trips-only seeds: `Bangalore 2026`, `Manali 2024`, `First date with my love`, `Family trip 2025`, `Frnds trip 2027`, `South India Trip 2024`, `Goa Gateway 2025`, `Kerala Backwaters 2023`
+- **Search:** tap `⌕` → inline bar filters by title/preview/category/blocks live
 - **Sort:** tap `≡↕` → sheet `By modified (newest/oldest)` / `By created (newest/oldest)` + Cancel (`app.js:140`)
-- **FAB:** yellow `+` at bottom-right — opens **New trip** modal (name, note, category)
+- **FAB:** yellow `+` at bottom-right — opens full **Editor** like screenshot (`prototype/web/index.html:185`, `styles.css:340`, `app.js:360`): `Title` + `10/3/2026, 21:56 | 0 characters | Category ▾` + toolbar (`AI`, `▦`, `Aa`, `≡`, `☑`, `🖼`, `＋`)
+- **Add photo + context horizontally:** each block has **photo (left) + context textarea (right)** side-by-side — tap photo → sheet `Choose from gallery / Take photo` → gallery uses `<input type=file accept=image/*>` , camera uses `capture=environment`; tap context → type what happened there; `+ Add photo + context` adds another block
 - **Bottom nav:** only **Trips | Me** (`To-do` removed) — active `#ffc400` (`styles.css:207`)
-- **Detail:** tap any trip → detail view with category/date, story preview placeholder, `Delete` (confirm)
-- Files: `prototype/web/index.html:101`, `styles.css:142`, `app.js:140`
+- **Detail:** tap any trip → detail view shows category/date + all photo+context blocks (side-by-side cards) + `Delete` (confirm)
+- Files: `prototype/web/index.html:101`, `styles.css:142`, `app.js:260`
 
 ### 4. Folders / Categories
 - Default: `Family`, `Frnds`, `Partner` — user can add custom folders via `＋` in drawer (`prototype/web/index.html:165`)
