@@ -1,0 +1,31 @@
+# Node / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+
+# Env (never commit real keys)
+.env
+.env.local
+apps/mobile/.env
+services/ai/.venv/
+services/ai/__pycache__/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# EAS local
+*.jks
+*.keystore
+*.p8
+*.p12

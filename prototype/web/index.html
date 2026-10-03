@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NASTORY — Prototype</title>
+  <link rel="icon" href="./assets/icon.png" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <!-- SPLASH -->
+  <section id="view-splash" class="view view-splash is-active" aria-label="Splash">
+    <div class="splash-stars" aria-hidden="true"></div>
+    <div class="splash-center">
+      <p class="splash-kicker">Welcome to</p>
+      <div class="splash-emblem" aria-hidden="true"><span>N</span></div>
+      <h1 class="splash-title">NASTORY</h1>
+      <div class="splash-rule"></div>
+      <p class="splash-caption">Your moments. Your story.</p>
+    </div>
+    <div class="splash-foot">
+      <span class="splash-loader" aria-hidden="true"></span>
+      <p class="splash-hint">Prototype - clickable - mock OTP 123456</p>
+      <button class="link-btn" id="btn-skip-splash" type="button">Skip -></button>
+    </div>
+  </section>
+
+  <!-- AUTH -->
+  <section id="view-auth" class="view view-auth" aria-label="Sign in or sign up">
+    <header class="appbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">N</div>
+        <span class="brand-name">NASTORY</span>
+      </div>
+      <span class="pill">Prototype</span>
+    </header>
+    <main class="card">
+      <div class="card-head">
+        <h2 id="auth-title">Welcome back</h2>
+        <p id="auth-sub" class="muted">Sign in or create an account to continue.</p>
+      </div>
+      <div class="seg" role="tablist" aria-label="Auth mode">
+        <button class="seg-btn is-active" data-mode="signin" role="tab" aria-selected="true" type="button">Sign in</button>
+        <button class="seg-btn" data-mode="signup" role="tab" aria-selected="false" type="button">Sign up</button>
+      </div>
+      <div class="subseg" role="tablist" aria-label="Channel">
+        <button class="subseg-btn is-active" data-channel="email" role="tab" aria-selected="true" type="button">Email</button>
+        <button class="subseg-btn" data-channel="phone" role="tab" aria-selected="false" type="button">Phone</button>
+      </div>
+      <form id="auth-form" novalidate>
+        <label class="field">
+          <span class="field-label" id="field-label">Email address</span>
+          <input id="field-input" class="input" autocomplete="email" placeholder="name@gmail.com" inputmode="email" />
+          <span id="field-hint" class="field-hint">Use a valid email like name@gmail.com - we'll send a 6-digit OTP.</span>
+          <span id="field-error" class="field-error" aria-live="polite"></span>
+        </label>
+        <button id="btn-send-otp" class="btn btn-primary" type="submit">Send OTP</button>
+        <p class="legal">By continuing you agree to our Terms - Testing flow, no real OTP sent.</p>
+      </form>
+      <div class="demo-box">
+        <strong>Rules:</strong> Email must be like <code>name@gmail.com</code> - Phone must be exactly <code>10 digits</code> (e.g. 9876543210). Mock OTP is <code>123456</code>.
+      </div>
+    </main>
+  </section>
+
+  <!-- OTP -->
+  <section id="view-otp" class="view view-auth" aria-label="Enter OTP">
+    <header class="appbar">
+      <button class="icon-btn" id="btn-back-to-auth" type="button" aria-label="Back">←</button>
+      <span class="appbar-title">Verify</span>
+      <span style="width:36px"></span>
+    </header>
+    <main class="card">
+      <h2>Enter OTP</h2>
+      <p class="muted" id="otp-sent-to">We sent a code to —</p>
+      <form id="otp-form" novalidate>
+        <div class="otp-group">
+          <div class="otp-row" id="otp-row">
+            <input class="otp-input" inputmode="numeric" maxlength="1" aria-label="Digit 1" />
+            <input class="otp-input" inputmode="numeric" maxlength="1" aria-label="Digit 2" />
+            <input class="otp-input" inputmode="numeric" maxlength="1" aria-label="Digit 3" />
+            <input class="otp-input" inputmode="numeric" maxlength="1" aria-label="Digit 4" />
+            <input class="otp-input" inputmode="numeric" maxlength="1" aria-label="Digit 5" />
+            <input class="otp-input" inputmode="numeric" maxlength="1" aria-label="Digit 6" />
+          </div>
+          <span class="otp-single-hint">Tip: paste a 6-digit code and it fills all boxes together.</span>
+        </div>
+        <input id="otp-single" maxlength="6" inputmode="numeric" aria-hidden="true" tabindex="-1" autocomplete="one-time-code" />
+        <span id="otp-error" class="field-error" aria-live="polite"></span>
+        <button id="btn-verify" class="btn btn-primary" type="submit" style="margin-top:14px">Verify &amp; continue</button>
+        <div class="otp-actions">
+          <span id="resend-hint" class="muted small">Resend in <span id="resend-sec">30</span>s</span>
+          <button id="btn-resend" class="link-btn" type="button" disabled>Resend OTP</button>
+          <button id="btn-edit" class="link-btn" type="button">Edit email / phone</button>
+        </div>
+      </form>
+      <div class="demo-box">Hint: try <code>123456</code> - also accepts any 6 digits for testing.</div>
+    </main>
+  </section>
+
+  <!-- TRIPS (main screen - replaces Notes) -->
+  <section id="view-trips" class="view view-trips" aria-label="Trips">
+    <header class="trips-header">
+      <button id="btn-open-folders" class="header-left" type="button" aria-label="Open folders">
+        <div class="header-icon" aria-hidden="true">
+          <span class="header-icon-mark">≡</span>
+        </div>
+        <div class="header-titles">
+          <div class="header-title"><span id="header-filter-name">All</span> <span class="header-chevron">▸</span></div>
+          <div class="header-count"><span id="header-count">7</span> trips</div>
+        </div>
+      </button>
+      <div class="header-actions">
+        <button id="btn-search" class="icon-btn-dark" type="button" aria-label="Search">⌕</button>
+        <button id="btn-sort" class="icon-btn-dark" type="button" aria-label="Sort">≡↕</button>
+      </div>
+    </header>
+
+    <div id="search-bar" class="search-bar hidden">
+      <input id="search-input" class="search-input" placeholder="Search trips (e.g. Bangalore, Family)" />
+      <button id="btn-clear-search" class="link-btn" type="button">Clear</button>
+    </div>
+
+    <div id="trips-list" class="trips-list" role="list"></div>
+
+    <button id="btn-fab-add" class="fab" type="button" aria-label="Add trip">+</button>
+
+    <nav class="bottom-nav" aria-label="Bottom navigation">
+      <button class="bottom-item is-active" data-nav="trips" type="button">
+        <span class="bottom-icon">◧</span>
+        <span>Trips</span>
+      </button>
+      <button class="bottom-item" data-nav="me" type="button">
+        <span class="bottom-icon">●</span>
+        <span>Me</span>
+      </button>
+    </nav>
+
+    <!-- Drawer overlay -->
+    <div id="drawer-overlay" class="drawer-overlay hidden">
+      <div id="drawer-backdrop" class="drawer-backdrop"></div>
+      <aside class="drawer" aria-label="Folders">
+        <div class="drawer-head">
+          <h3>Trips</h3>
+          <button id="btn-close-drawer" class="icon-btn-dark" type="button">✕</button>
+        </div>
+
+        <div class="drawer-section">
+          <button id="folder-all" class="folder-row is-active" data-filter="all" type="button">
+            <span class="folder-icon all">◧</span>
+            <span class="folder-name">All</span>
+            <span class="folder-count" id="folder-count-all">7</span>
+            <span class="folder-arrow">›</span>
+          </button>
+          <button id="folder-uncat" class="folder-row" data-filter="Uncategorized" type="button">
+            <span class="folder-icon uncat">?</span>
+            <span class="folder-name">Uncategorized</span>
+            <span class="folder-count" id="folder-count-uncat">0</span>
+            <span class="folder-arrow">›</span>
+          </button>
+        </div>
+
+        <div class="drawer-divider"></div>
+
+        <div class="drawer-section">
+          <div class="drawer-label-row">
+            <span class="drawer-label">My folders</span>
+            <button id="btn-add-category" class="icon-btn-dark small" type="button" title="Add folder">＋</button>
+          </div>
+          <div id="folders-my" class="folders-my"></div>
+          <div id="add-category-row" class="add-category-row hidden">
+            <input id="input-new-category" class="input small" placeholder="Folder name (e.g. Solo)" maxlength="20" />
+            <button id="btn-confirm-category" class="btn btn-primary small" type="button">Add</button>
+            <button id="btn-cancel-category" class="link-btn small" type="button">Cancel</button>
+          </div>
+          <p class="field-hint small" style="margin-top:8px">Categories: Family, Frnds, Partner — add your own.</p>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Sort sheet -->
+    <div id="sort-modal" class="modal-overlay hidden" aria-hidden="true">
+      <div class="sheet" role="dialog" aria-label="Sort trips">
+        <h3 class="sheet-title">Sort trips</h3>
+        <div class="sheet-options" id="sort-options">
+          <label class="sheet-option"><input type="radio" name="sort" value="modified_desc" checked /> By modified (newest first) <span class="radio"></span></label>
+          <label class="sheet-option"><input type="radio" name="sort" value="modified_asc" /> By modified (oldest first) <span class="radio"></span></label>
+          <label class="sheet-option"><input type="radio" name="sort" value="created_desc" /> By created (newest first) <span class="radio"></span></label>
+          <label class="sheet-option"><input type="radio" name="sort" value="created_asc" /> By created (oldest first) <span class="radio"></span></label>
+        </div>
+        <button id="btn-sort-cancel" class="sheet-cancel" type="button">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Create Trip modal -->
+    <div id="create-modal" class="modal-overlay hidden" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-label="New trip">
+        <h3 id="create-title">New trip</h3>
+        <label class="field">
+          <span class="field-label">Trip name</span>
+          <input id="create-trip-title" class="input" placeholder="e.g. Bangalore 2026" maxlength="40" />
+        </label>
+        <label class="field">
+          <span class="field-label">Note</span>
+          <input id="create-trip-note" class="input" placeholder="e.g. Sunsets, friends and stories..." maxlength="80" />
+        </label>
+        <label class="field">
+          <span class="field-label">Category</span>
+          <select id="create-trip-category" class="input"></select>
+        </label>
+        <span id="create-error" class="field-error"></span>
+        <div style="display:flex; gap:10px; margin-top:14px">
+          <button id="btn-create-cancel" class="btn" type="button" style="flex:1; background:#222; color:#fff; border:1px solid #333">Cancel</button>
+          <button id="btn-create-save" class="btn btn-primary" type="button" style="flex:1">Create</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete confirm -->
+    <div id="delete-modal" class="modal-overlay hidden" aria-hidden="true">
+      <div class="modal-card small">
+        <h3>Delete trip?</h3>
+        <p class="muted small" id="delete-msg">Are you sure?</p>
+        <div style="display:flex; gap:10px; margin-top:14px">
+          <button id="btn-delete-cancel" class="btn" type="button" style="flex:1; background:#222; color:#fff; border:1px solid #333">Cancel</button>
+          <button id="btn-delete-confirm" class="btn" type="button" style="flex:1; background:#ff3b30; color:#fff">Delete</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRIP DETAIL -->
+  <section id="view-trip-detail" class="view view-trips" aria-label="Trip detail">
+    <header class="trips-header">
+      <button id="btn-back-to-trips" class="icon-btn-dark" type="button">←</button>
+      <div class="header-titles" style="flex:1; margin-left:12px">
+        <div id="detail-title" class="header-title" style="font-size:16px">Trip</div>
+        <div id="detail-meta" class="header-count">—</div>
+      </div>
+      <button id="btn-delete-trip" class="link-btn" type="button" style="color:#ff6b6b">Delete</button>
+    </header>
+    <div class="detail-body">
+      <div class="detail-card">
+        <div class="detail-cat" id="detail-cat">Family</div>
+        <h2 id="detail-h1" style="margin:8px 0 6px"></h2>
+        <p id="detail-note" class="muted"></p>
+        <div style="margin-top:14px; padding-top:14px; border-top:1px solid #222">
+          <p class="field-label">Story preview</p>
+          <p class="muted small" id="detail-story">Your story will appear here after you generate it. (prototype - story AI later)</p>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:18px">
+          <button class="btn btn-primary" type="button" onclick="document.getElementById('toast').textContent='Generate story - coming next'; document.getElementById('toast').classList.add('show'); setTimeout(()=>document.getElementById('toast').classList.remove('show'),1800)">Generate Story</button>
+        </div>
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <button class="bottom-item is-active" data-nav="trips" type="button"><span class="bottom-icon">◧</span><span>Trips</span></button>
+      <button class="bottom-item" data-nav="me" type="button"><span class="bottom-icon">●</span><span>Me</span></button>
+    </nav>
+  </section>
+
+  <!-- ME -->
+  <section id="view-me" class="view view-trips" aria-label="Me">
+    <header class="trips-header">
+      <div class="header-titles">
+        <div class="header-title">Me</div>
+        <div class="header-count" id="me-subtitle">Signed in</div>
+      </div>
+      <button id="btn-me-logout" class="link-btn" type="button">Log out</button>
+    </header>
+    <div class="me-body">
+      <div class="me-card">
+        <div class="me-avatar">N</div>
+        <div id="me-email" class="me-email">—</div>
+        <div class="me-stats">
+          <div class="me-stat"><strong id="me-count">0</strong><span>trips</span></div>
+          <div class="me-stat"><strong id="me-cats">3</strong><span>folders</span></div>
+        </div>
+      </div>
+      <div class="me-card" style="margin-top:14px">
+        <div class="field-label">About NASTORY</div>
+        <p class="muted small">Your moments. Your story. Trips are like notes - Bangalore 2026, Manali 2024, first date etc. Organize by Family / Frnds / Partner.</p>
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <button class="bottom-item" data-nav="trips" type="button"><span class="bottom-icon">◧</span><span>Trips</span></button>
+      <button class="bottom-item is-active" data-nav="me" type="button"><span class="bottom-icon">●</span><span>Me</span></button>
+    </nav>
+  </section>
+
+  <!-- keep old home hidden for compat -->
+  <section id="view-home" class="view hidden" aria-hidden="true"></section>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "na-story",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "mobile": "npm run start --workspace=na-story-mobile",
+    "ai": "uvicorn main:app --reload --port 8000",
+    "ai:install": "pip install -r services/ai/requirements.txt"
+  }
+}
