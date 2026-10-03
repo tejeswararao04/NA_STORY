@@ -192,31 +192,7 @@
       </div>
     </div>
 
-    <!-- Create Trip modal -->
-    <div id="create-modal" class="modal-overlay hidden" aria-hidden="true">
-      <div class="modal-card" role="dialog" aria-label="New trip">
-        <h3 id="create-title">New trip</h3>
-        <label class="field">
-          <span class="field-label">Trip name</span>
-          <input id="create-trip-title" class="input" placeholder="e.g. Bangalore 2026" maxlength="40" />
-        </label>
-        <label class="field">
-          <span class="field-label">Note</span>
-          <input id="create-trip-note" class="input" placeholder="e.g. Sunsets, friends and stories..." maxlength="80" />
-        </label>
-        <label class="field">
-          <span class="field-label">Category</span>
-          <select id="create-trip-category" class="input"></select>
-        </label>
-        <span id="create-error" class="field-error"></span>
-        <div style="display:flex; gap:10px; margin-top:14px">
-          <button id="btn-create-cancel" class="btn" type="button" style="flex:1; background:#222; color:#fff; border:1px solid #333">Cancel</button>
-          <button id="btn-create-save" class="btn btn-primary" type="button" style="flex:1">Create</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Delete confirm -->
+    <!-- Delete confirm (inside trips) -->
     <div id="delete-modal" class="modal-overlay hidden" aria-hidden="true">
       <div class="modal-card small">
         <h3>Delete trip?</h3>
@@ -225,6 +201,52 @@
           <button id="btn-delete-cancel" class="btn" type="button" style="flex:1; background:#222; color:#fff; border:1px solid #333">Cancel</button>
           <button id="btn-delete-confirm" class="btn" type="button" style="flex:1; background:#ff3b30; color:#fff">Delete</button>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDITOR - Add photo + context horizontally, like reference -->
+  <section id="view-editor" class="view view-editor" aria-label="Trip editor">
+    <header class="editor-header">
+      <button id="btn-editor-back" class="icon-btn-dark" type="button" aria-label="Back">‹</button>
+      <div class="editor-header-actions">
+        <button class="icon-btn-dark small" type="button" title="Undo" onclick="toast('Undo - coming soon')">↩</button>
+        <button class="icon-btn-dark small" type="button" title="Redo" onclick="toast('Redo - coming soon')">↪</button>
+        <button id="btn-editor-save" class="icon-btn-dark" type="button" aria-label="Save" style="color:#ffc400">✓</button>
+      </div>
+    </header>
+    <div class="editor-body">
+      <input id="editor-title" class="editor-title" placeholder="Title" maxlength="60" />
+      <div class="editor-meta">
+        <span id="editor-date">10/3/2026, 21:56</span> | <span id="editor-chars">0 characters</span> | 
+        <span class="editor-cat-wrap">
+          <select id="editor-category" class="editor-category"></select> ▾
+        </span>
+        <span id="editor-error" class="field-error" style="margin-left:8px"></span>
+      </div>
+      <div id="editor-blocks" class="editor-blocks"></div>
+      <button id="btn-add-block" class="btn-add-block" type="button">+ Add photo + context</button>
+      <p class="field-hint small" style="margin-top:10px">Tip: photo and context sit side-by-side. Tap photo for Gallery / Camera.</p>
+    </div>
+    <div class="editor-toolbar">
+      <button class="toolbar-btn" type="button" onclick="toast('AI - coming soon')" title="AI">AI</button>
+      <button class="toolbar-btn" type="button" onclick="toast('Template - coming soon')" title="Sections">▦</button>
+      <button class="toolbar-btn" type="button" onclick="toast('Text style - coming soon')" title="Aa">Aa</button>
+      <button class="toolbar-btn" type="button" onclick="toast('List - coming soon')" title="List">≡</button>
+      <button class="toolbar-btn" type="button" onclick="toast('Tasks - coming soon')" title="Todo">☑</button>
+      <button id="btn-toolbar-image" class="toolbar-btn" type="button" title="Add photo">🖼</button>
+      <button id="btn-toolbar-plus" class="toolbar-btn primary" type="button" title="Add block">＋</button>
+    </div>
+    <input id="input-gallery" type="file" accept="image/*" hidden />
+    <input id="input-camera" type="file" accept="image/*" capture="environment" hidden />
+    <div id="photo-choice" class="modal-overlay hidden" aria-hidden="true">
+      <div class="sheet">
+        <h3 class="sheet-title">Add photo</h3>
+        <div class="sheet-options">
+          <button id="btn-choose-gallery" class="sheet-option" type="button">Choose from gallery <span>›</span></button>
+          <button id="btn-take-photo" class="sheet-option" type="button">Take photo <span>›</span></button>
+        </div>
+        <button id="btn-photo-cancel" class="sheet-cancel" type="button">Cancel</button>
       </div>
     </div>
   </section>

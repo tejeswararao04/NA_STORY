@@ -9,6 +9,7 @@
     trips: $("#view-trips"),
     detail: $("#view-trip-detail"),
     me: $("#view-me"),
+    editor: $("#view-editor"),
     home: $("#view-home"),
   };
 
@@ -23,8 +24,7 @@
     const target = views[name];
     if (target) target.classList.add("is-active");
     window.scrollTo(0,0);
-    // trips/me share bottom padding, ensure background correct
-    document.body.style.background = (name === "trips" || name === "detail" || name === "me") ? "#000" : "";
+    document.body.style.background = (name === "trips" || name === "detail" || name === "me" || name === "editor") ? "#000" : "";
   }
 
   function toast(msg) {
@@ -34,6 +34,8 @@
     clearTimeout(toast._t);
     toast._t = setTimeout(() => t.classList.remove("show"), 2200);
   }
+  // expose for inline handlers in editor/detail
+  window.toast = toast;
 
   function getEmailError(v) {
     v = v.trim();
@@ -264,15 +266,16 @@
   const STORAGE_SORT = "nastory_sort_v1";
 
   const DEFAULT_CATS = ["Family", "Frnds", "Partner"];
+  // trips only - no tpo/9i/irrelevant namings
   const DEFAULT_TRIPS = [
-    { id:"1", title:"Bangalore 2026", preview:"Sunrise at Ulsoor, coffee and family stories", category:"Family", dateLabel:"September 26", created:"2026-09-26T10:00:00", modified:"2026-09-26T10:00:00" },
-    { id:"2", title:"Manali 2024", preview:"Snow trails, maggi and friends forever", category:"Frnds", dateLabel:"September 25", created:"2024-09-25T10:00:00", modified:"2024-09-25T10:00:00" },
-    { id:"3", title:"First date with my love", preview:"Oct 7 - the day everything changed", category:"Partner", dateLabel:"September 21", created:"2024-10-07T10:00:00", modified:"2024-09-21T10:00:00" },
-    { id:"4", title:"Family trip 2025", preview:"ISB campus, marketplace and warm hugs", category:"Family", dateLabel:"September 21", created:"2025-09-21T10:00:00", modified:"2025-09-21T10:00:00" },
-    { id:"5", title:"Frnds trip 2027", preview:"How idea can bring money for organisation", category:"Frnds", dateLabel:"September 15", created:"2027-09-15T10:00:00", modified:"2027-09-15T10:00:00" },
-    { id:"6", title:"Goa diaries", preview:"Bakul mess 2 - sunsets and old friends", category:"Frnds", dateLabel:"September 21", created:"2025-09-21T09:00:00", modified:"2025-09-21T09:00:00" },
-    { id:"7", title:"Tpo", preview:"Placement talks and late night prep", category:"Uncategorized", dateLabel:"September 25", created:"2025-09-25T08:00:00", modified:"2025-09-25T08:00:00" },
-    { id:"8", title:"9i", preview:"Hello so9looophould - random note", category:"Uncategorized", dateLabel:"September 26", created:"2026-09-26T09:00:00", modified:"2026-09-26T09:00:00" },
+    { id:"1", title:"Bangalore 2026", preview:"Sunrise at Ulsoor, coffee and family stories", category:"Family", dateLabel:"September 26", created:"2026-09-26T10:00:00", modified:"2026-09-26T10:00:00", blocks:[{image:null, context:"Sunrise at Ulsoor, coffee and family stories - the city that felt like home."}] },
+    { id:"2", title:"Manali 2024", preview:"Snow trails, maggi and friends forever", category:"Frnds", dateLabel:"September 25", created:"2024-09-25T10:00:00", modified:"2024-09-25T10:00:00", blocks:[{image:null, context:"Snow trails, maggi and friends forever - Manali with my squad."}] },
+    { id:"3", title:"First date with my love", preview:"Oct 7 - the day everything changed", category:"Partner", dateLabel:"September 21", created:"2024-10-07T10:00:00", modified:"2024-09-21T10:00:00", blocks:[{image:null, context:"Oct 7 - the day everything changed. First coffee, first walk."}] },
+    { id:"4", title:"Family trip 2025", preview:"Temples, beaches and home food in South India", category:"Family", dateLabel:"September 21", created:"2025-09-21T10:00:00", modified:"2025-09-21T10:00:00", blocks:[{image:null, context:"Temples, beaches and home food - family trip across South India."}] },
+    { id:"5", title:"Frnds trip 2027", preview:"Late nights, startups and Silicon dreams", category:"Frnds", dateLabel:"September 15", created:"2027-09-15T10:00:00", modified:"2027-09-15T10:00:00", blocks:[{image:null, context:"Late nights, startups and Silicon dreams with friends."}] },
+    { id:"6", title:"South India Trip 2024", preview:"Kerala backwaters, filter coffee and sunsets", category:"Family", dateLabel:"September 20", created:"2024-09-20T10:00:00", modified:"2024-09-20T10:00:00", blocks:[{image:null, context:"Kerala backwaters, filter coffee and sunsets - South India at its best."}] },
+    { id:"7", title:"Goa Gateway 2025", preview:"Bakul mess, sunsets and old friends", category:"Frnds", dateLabel:"September 21", created:"2025-09-21T09:00:00", modified:"2025-09-21T09:00:00", blocks:[{image:null, context:"Bakul mess, sunsets and old friends - Goa that we will never forget."}] },
+    { id:"8", title:"Kerala Backwaters 2023", preview:"Houseboat, calm waters and family laughter", category:"Family", dateLabel:"September 18", created:"2023-09-18T10:00:00", modified:"2023-09-18T10:00:00", blocks:[{image:null, context:"Houseboat, calm waters and family laughter - Kerala 2023."}] },
   ];
 
   let categories = [];
@@ -290,12 +293,18 @@
       const f = localStorage.getItem(STORAGE_FILTER);
       const s = localStorage.getItem(STORAGE_SORT);
       categories = Array.isArray(c) && c.length ? c : [...DEFAULT_CATS];
-      trips = Array.isArray(t) && t.length ? t : [...DEFAULT_TRIPS];
+      let loadedTrips = Array.isArray(t) && t.length ? t : [...DEFAULT_TRIPS];
+      // migrate: ensure trips-related only, drop any tpo/9i style if stored from earlier version
+      const badTitles = new Set(["tpo","9i","501684"]);
+      loadedTrips = loadedTrips.filter(x=> !badTitles.has(String(x.title).toLowerCase()));
+      // if filtered we added new defaults anyway, ensure at least 6 trips
+      if (loadedTrips.length < 5) loadedTrips = [...DEFAULT_TRIPS];
+      trips = loadedTrips.map(normalizeTrip);
       if (f) currentFilter = f;
       if (s) currentSort = s;
     } catch {
       categories = [...DEFAULT_CATS];
-      trips = [...DEFAULT_TRIPS];
+      trips = [...DEFAULT_TRIPS].map(normalizeTrip);
     }
   }
   function saveState() {
@@ -320,10 +329,16 @@
     if (currentFilter !== "all") {
       list = list.filter(t => t.category === currentFilter);
     }
-    // search
+    // search across title, preview, category and blocks
     if (currentSearch.trim()) {
       const q = currentSearch.trim().toLowerCase();
-      list = list.filter(t => t.title.toLowerCase().includes(q) || t.preview.toLowerCase().includes(q) || t.category.toLowerCase().includes(q));
+      list = list.filter(t => {
+        const inTitle = t.title.toLowerCase().includes(q);
+        const inPreview = (t.preview||"").toLowerCase().includes(q);
+        const inCat = t.category.toLowerCase().includes(q);
+        const inBlocks = Array.isArray(t.blocks) && t.blocks.some(b=> (b.context||"").toLowerCase().includes(q));
+        return inTitle || inPreview || inCat || inBlocks;
+      });
     }
     // sort
     list.sort((a,b) => {
@@ -343,7 +358,8 @@
   function renderAll() {
     renderTrips();
     renderFolders();
-    renderCreateCategoryOptions();
+    // keep editor category in sync
+    renderEditorCategoryOptions();
     updateHeaderCount();
     updateFolderCounts();
   }
@@ -373,8 +389,9 @@
       row.className = "trip-item";
       row.setAttribute("role","listitem");
       row.dataset.id = t.id;
+      const preview = getTripPreview(t);
       row.innerHTML = '<div class="trip-title">'+escapeHtml(t.title)+'</div>'
-        + '<div class="trip-preview">'+escapeHtml(t.preview)+'</div>'
+        + '<div class="trip-preview">'+escapeHtml(preview)+'</div>'
         + '<div class="trip-meta"><span class="trip-date">'+escapeHtml(t.dateLabel)+'</span><span class="trip-cat">'+escapeHtml(t.category)+'</span></div>';
       row.addEventListener("click", () => openTrip(t.id));
       listEl.appendChild(row);
@@ -406,19 +423,11 @@
   function updateFolderCounts() {
     $("#folder-count-all").textContent = String(trips.length);
     $("#folder-count-uncat").textContent = String(trips.filter(t=>t.category==="Uncategorized").length);
-    // per-folder counts are rendered in renderFolders
   }
 
-  function renderCreateCategoryOptions() {
-    const sel = $("#create-trip-category");
-    if (!sel) return;
-    sel.innerHTML = "";
-    const opts = ["Uncategorized", ...categories];
-    opts.forEach(c => {
-      const o = document.createElement("option");
-      o.value = c; o.textContent = c;
-      sel.appendChild(o);
-    });
+  // legacy helper kept for compat - now editor does same
+  function renderCreateCategoryOptions(){
+    renderEditorCategoryOptions();
   }
 
   function setFilter(f) {
@@ -429,14 +438,30 @@
   }
 
   function openTrip(id) {
-    const t = trips.find(x=>x.id===id);
-    if (!t) return;
+    const t = normalizeTrip(trips.find(x=>x.id===id) || {});
+    if (!t || !t.id) return;
     selectedTripId = id;
     $("#detail-title").textContent = t.title;
     $("#detail-h1").textContent = t.title;
-    $("#detail-note").textContent = t.preview;
+    const preview = getTripPreview(t);
+    $("#detail-note").textContent = preview;
     $("#detail-cat").textContent = t.category;
     $("#detail-meta").textContent = t.dateLabel + " - " + t.category;
+    // render detail blocks if any
+    const detailStory = $("#detail-story");
+    if (detailStory) {
+      if (Array.isArray(t.blocks) && t.blocks.length) {
+        detailStory.innerHTML = t.blocks.map(b=>{
+          const img = b.image ? '<img src="'+b.image+'" style="width:100%; max-height:220px; object-fit:cover; border-radius:10px; margin:8px 0; border:1px solid #222" />' : '';
+          const ctx = b.context ? '<div style="margin:6px 0; color:#ccc">'+escapeHtml(b.context)+'</div>' : '<div style="color:#666">No context</div>';
+          return '<div style="display:flex; gap:10px; align-items:stretch; margin:10px 0; padding:8px; background:#0f0f0f; border:1px solid #1a1a1a; border-radius:10px">'+
+            '<div style="width:110px; flex:0 0 110px; border-radius:8px; overflow:hidden; background:#1a1a1a; display:grid; place-items:center">'+ (b.image ? '<img src="'+b.image+'" style="width:100%; height:100%; object-fit:cover"/>' : '<span style="font-size:11px; color:#777">No photo</span>') +'</div>'+
+            '<div style="flex:1; font-size:13px; color:#ddd">'+escapeHtml(b.context || "No context")+'</div></div>';
+        }).join("");
+      } else {
+        detailStory.textContent = "Your story will appear here after you generate it. (prototype - story AI later)";
+      }
+    }
     showView("detail");
   }
 
@@ -527,44 +552,200 @@
     });
   });
 
-  // FAB create trip
+  // ===== EDITOR - + button like screenshot (Title + side-by-side photo + context) =====
   const btnFab = $("#btn-fab-add");
-  const createModal = $("#create-modal");
-  const btnCreateCancel = $("#btn-create-cancel");
-  const btnCreateSave = $("#btn-create-save");
-  function openCreate(){
-    $("#create-trip-title").value="";
-    $("#create-trip-note").value="";
-    $("#create-error").textContent="";
-    renderCreateCategoryOptions();
-    createModal.classList.remove("hidden");
-    setTimeout(()=> $("#create-trip-title").focus(), 80);
+  const editorView = $("#view-editor");
+  let editorBlocks = []; // {image: dataUrl|null, context: string}
+  let pendingPhotoIndex = null;
+
+  function getTripPreview(t){
+    if (Array.isArray(t.blocks) && t.blocks.length) {
+      const first = t.blocks.find(b=>b.context && b.context.trim()) || t.blocks[0];
+      return first.context || t.preview || "";
+    }
+    return t.preview || "";
   }
-  function closeCreate(){ createModal.classList.add("hidden"); }
-  if (btnFab) btnFab.addEventListener("click", openCreate);
-  if (btnCreateCancel) btnCreateCancel.addEventListener("click", closeCreate);
-  if (createModal) createModal.addEventListener("click", (e)=>{ if(e.target===createModal) closeCreate(); });
-  if (btnCreateSave) btnCreateSave.addEventListener("click", ()=>{
-    const title = $("#create-trip-title").value.trim();
-    const note = $("#create-trip-note").value.trim();
-    const cat = $("#create-trip-category").value;
-    const errEl = $("#create-error");
-    if (!title) { errEl.textContent="Enter trip name"; return; }
-    if (title.length < 2) { errEl.textContent="Name too short"; return; }
+
+  function normalizeTrip(t){
+    if (!Array.isArray(t.blocks) || t.blocks.length===0) {
+      t.blocks = [{ image: null, context: t.preview || "" }];
+    }
+    // ensure each block has image/context
+    t.blocks = t.blocks.map(b=> ({ image: b.image || null, context: b.context || "" }));
+    if (!t.preview) t.preview = getTripPreview(t);
+    return t;
+  }
+
+  // migrate existing stored trips
+  function migrateTrips(){
+    trips = trips.map(normalizeTrip);
+  }
+
+  function openEditor(){
+    // reset
+    $("#editor-title").value = "";
+    $("#editor-error").textContent = "";
+    $("#editor-chars").textContent = "0 characters";
+    const now = new Date();
+    $("#editor-date").textContent = now.toLocaleDateString("en-US",{month:"numeric", day:"numeric", year:"numeric"}) + ", " + now.toLocaleTimeString("en-US",{hour:"2-digit", minute:"2-digit"});
+    editorBlocks = [{ image:null, context:"" }];
+    pendingPhotoIndex = null;
+    renderEditorCategoryOptions();
+    renderEditorBlocks();
+    showView("editor");
+    setTimeout(()=> $("#editor-title").focus(), 80);
+  }
+  function closeEditor(){
+    showView("trips");
+  }
+
+  function renderEditorCategoryOptions(){
+    const sel = $("#editor-category");
+    if (!sel) return;
+    sel.innerHTML = "";
+    const opts = ["Uncategorized", ...categories];
+    opts.forEach(c=>{
+      const o=document.createElement("option");
+      o.value=c; o.textContent=c;
+      sel.appendChild(o);
+    });
+    sel.value = categories.includes("Family") ? "Family" : opts[0];
+  }
+
+  function renderEditorBlocks(){
+    const container = $("#editor-blocks");
+    container.innerHTML = "";
+    editorBlocks.forEach((b, idx)=>{
+      const row = document.createElement("div");
+      row.className = "block";
+      row.dataset.idx = String(idx);
+      const photoHtml = b.image
+        ? '<img src="'+b.image+'" alt="photo" />'
+        : '<div class="photo-placeholder">Add photo<br/><span style="font-size:10px; color:#777">Gallery / Camera</span></div>';
+      const overlay = b.image ? '<div class="photo-overlay"><span>Change</span></div>' : '<div class="photo-overlay"><span>Choose</span></div>';
+      row.innerHTML = '<div class="block-photo '+(b.image?'has-image':'')+'" data-photo-idx="'+idx+'">'+photoHtml+overlay+'</div>'
+        + '<div class="block-context"><textarea placeholder="What happened here? Write context..." rows="3" data-ctx-idx="'+idx+'">'+escapeHtml(b.context)+'</textarea></div>'
+        + '<button class="block-delete" type="button" data-del-idx="'+idx+'">x</button>';
+      container.appendChild(row);
+    });
+    // attach listeners
+    container.querySelectorAll("[data-photo-idx]").forEach(el=>{
+      el.addEventListener("click", ()=>{
+        pendingPhotoIndex = parseInt(el.dataset.photoIdx,10);
+        openPhotoChoice();
+      });
+    });
+    container.querySelectorAll("[data-ctx-idx]").forEach(el=>{
+      el.addEventListener("input", ()=>{
+        const i = parseInt(el.dataset.ctxIdx,10);
+        editorBlocks[i].context = el.value;
+        updateEditorChars();
+      });
+    });
+    container.querySelectorAll("[data-del-idx]").forEach(el=>{
+      el.addEventListener("click", ()=>{
+        const i = parseInt(el.dataset.delIdx,10);
+        if (editorBlocks.length===1) { toast("At least one block"); return; }
+        editorBlocks.splice(i,1);
+        renderEditorBlocks();
+        updateEditorChars();
+      });
+    });
+    updateEditorChars();
+  }
+
+  function updateEditorChars(){
+    const title = $("#editor-title").value || "";
+    const ctxLen = editorBlocks.reduce((s,b)=> s + (b.context||"").length, 0);
+    const total = title.length + ctxLen;
+    $("#editor-chars").textContent = total + " characters";
+  }
+
+  // photo choice sheet
+  const photoChoice = $("#photo-choice");
+  const inputGallery = $("#input-gallery");
+  const inputCamera = $("#input-camera");
+  function openPhotoChoice(){ photoChoice.classList.remove("hidden"); }
+  function closePhotoChoice(){ photoChoice.classList.add("hidden"); }
+  const btnChooseGallery = $("#btn-choose-gallery");
+  const btnTakePhoto = $("#btn-take-photo");
+  const btnPhotoCancel = $("#btn-photo-cancel");
+  if (btnChooseGallery) btnChooseGallery.addEventListener("click", ()=>{ closePhotoChoice(); inputGallery.click(); });
+  if (btnTakePhoto) btnTakePhoto.addEventListener("click", ()=>{ closePhotoChoice(); inputCamera.click(); });
+  if (btnPhotoCancel) btnPhotoCancel.addEventListener("click", closePhotoChoice);
+  if (photoChoice) photoChoice.addEventListener("click", e=>{ if(e.target===photoChoice) closePhotoChoice(); });
+
+  function handleImageFile(file){
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast("Choose an image"); return; }
+    if (file.size > 8*1024*1024) { toast("Image too large (max 8MB)"); return; }
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      if (pendingPhotoIndex!==null && editorBlocks[pendingPhotoIndex]) {
+        editorBlocks[pendingPhotoIndex].image = reader.result;
+        renderEditorBlocks();
+        toast("Photo added");
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+  if (inputGallery) inputGallery.addEventListener("change", ()=>{ handleImageFile(inputGallery.files[0]); inputGallery.value=""; });
+  if (inputCamera) inputCamera.addEventListener("change", ()=>{ handleImageFile(inputCamera.files[0]); inputCamera.value=""; });
+
+  const editorTitle = $("#editor-title");
+  if (editorTitle) editorTitle.addEventListener("input", updateEditorChars);
+
+  const btnAddBlock = $("#btn-add-block");
+  if (btnAddBlock) btnAddBlock.addEventListener("click", ()=>{
+    editorBlocks.push({ image:null, context:"" });
+    renderEditorBlocks();
+  });
+  const btnToolbarImage = $("#btn-toolbar-image");
+  if (btnToolbarImage) btnToolbarImage.addEventListener("click", ()=>{
+    editorBlocks.push({ image:null, context:"" });
+    renderEditorBlocks();
+    // open photo chooser for the new block
+    pendingPhotoIndex = editorBlocks.length-1;
+    setTimeout(openPhotoChoice, 80);
+  });
+  const btnToolbarPlus = $("#btn-toolbar-plus");
+  if (btnToolbarPlus) btnToolbarPlus.addEventListener("click", ()=>{
+    editorBlocks.push({ image:null, context:"" });
+    renderEditorBlocks();
+  });
+
+  const btnEditorBack = $("#btn-editor-back");
+  if (btnEditorBack) btnEditorBack.addEventListener("click", closeEditor);
+  const btnEditorSave = $("#btn-editor-save");
+  if (btnEditorSave) btnEditorSave.addEventListener("click", ()=>{
+    const title = $("#editor-title").value.trim();
+    const cat = $("#editor-category").value;
+    const errEl = $("#editor-error");
+    if (!title) { errEl.textContent = "Enter title (e.g. South India Trip)"; return; }
+    if (title.length < 2) { errEl.textContent = "Title too short"; return; }
+    const hasContent = editorBlocks.some(b=> b.context.trim() || b.image);
+    if (!hasContent) { errEl.textContent = "Add at least one photo or context"; return; }
+    errEl.textContent = "";
     const now = new Date();
     const dateLabel = now.toLocaleDateString("en-US",{month:"long", day:"numeric"});
+    // build preview from first context
+    const firstCtx = editorBlocks.find(b=>b.context.trim())?.context || "";
+    const preview = firstCtx ? firstCtx.slice(0,80) : (editorBlocks[0].image ? "Photo trip" : "No note yet");
     const newTrip = {
       id: String(Date.now()),
-      title, preview: note || "No note yet",
+      title, preview,
       category: cat, dateLabel,
-      created: now.toISOString(), modified: now.toISOString()
+      created: now.toISOString(), modified: now.toISOString(),
+      blocks: editorBlocks.map(b=> ({ image:b.image, context:b.context }))
     };
     trips.unshift(newTrip);
     saveState();
     renderAll();
-    closeCreate();
-    toast("Trip created: "+title);
+    closeEditor();
+    toast("Trip saved: "+title);
   });
+
+  if (btnFab) btnFab.addEventListener("click", openEditor);
 
   // Detail back / delete
   const btnBackToTrips = $("#btn-back-to-trips");
@@ -623,17 +804,26 @@
     $$(".otp-input").forEach(i=>i.value="");
     const single = $("#otp-single");
     if(single) single.value="";
-    closeDrawer(); closeSort(); closeCreate();
-    deleteModal.classList.add("hidden");
+    closeDrawer(); closeSort();
+    if (typeof closeEditor === "function") { /* editor is a view, no overlay */ }
+    if (deleteModal) deleteModal.classList.add("hidden");
+    const pc = $("#photo-choice");
+    if (pc) pc.classList.add("hidden");
     showView("auth");
     toast("Logged out - back to sign in");
   });
 
-  // Allow view-trips to be shown for dev if already authed - check localStorage
-  // keyboard: Escape closes modals/drawer
+  // keyboard: Escape closes modals/drawer/editor sheets
   document.addEventListener("keydown", (e)=>{
     if(e.key==="Escape"){
-      closeDrawer(); closeSort(); closeCreate(); deleteModal.classList.add("hidden");
+      closeDrawer(); closeSort();
+      const pc = $("#photo-choice");
+      if (pc) pc.classList.add("hidden");
+      if (deleteModal) deleteModal.classList.add("hidden");
+      // if editor open, go back to trips
+      if (views.editor && views.editor.classList.contains("is-active")) {
+        showView("trips");
+      }
     }
     if(views.splash && views.splash.classList.contains("is-active") && e.key==="Enter"){
       clearTimeout(splashTimer);
